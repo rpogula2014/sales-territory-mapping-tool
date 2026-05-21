@@ -1,8 +1,8 @@
-"""Live API-driven endpoints — Oracle DC mapping + prod-msa locations + BQ metrics
+"""Live API-driven endpoints — BQ DC mapping + prod-msa locations + BQ metrics
 + local assignment persistence (Phase 3).
 
 Errors:
-- 503 when Oracle / BQ are not configured.
+- 503 when BQ is not configured.
 - 502 when prod-msa upstream fails.
 - 409 on assignment version mismatch.
 """
@@ -24,8 +24,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.database import get_db
 from app.core.security import CurrentUser, get_current_user
 from app.services import (
+    bq_dc,
     bq_metrics,
-    dc_oracle,
     filter_schema,
     geocode_enrich,
     live_assign,
@@ -33,7 +33,6 @@ from app.services import (
     seller_colors,
 )
 from app.services.bq_metrics import BigQueryNotConfiguredError
-from app.services.dc_oracle import OracleNotConfiguredError
 
 router = APIRouter()
 
@@ -72,13 +71,6 @@ _METRICS_FIELDS = (
     "ytdunits",
     "priorytdsales",
 )
-
-
-def _oracle_unavailable() -> HTTPException:
-    return HTTPException(
-        status_code=503,
-        detail="Live endpoints disabled — Oracle not configured.",
-    )
 
 
 def _bq_unavailable(exc: BigQueryNotConfiguredError) -> HTTPException:
@@ -158,17 +150,17 @@ async def _attach_assignments(db: AsyncSession, locations: list[dict[str, Any]])
 @router.get("/regions")
 async def get_regions() -> list[str]:
     try:
-        return await dc_oracle.list_regions()
-    except OracleNotConfiguredError as exc:
-        raise _oracle_unavailable() from exc
+        return await bq_dc.list_regions()
+    except BigQueryNotConfiguredError as exc:
+        raise _bq_unavailable(exc) from exc
 
 
 @router.get("/markets")
 async def get_markets(region: str | None = Query(default=None)) -> list[str]:
     try:
-        return await dc_oracle.list_markets(region=region)
-    except OracleNotConfiguredError as exc:
-        raise _oracle_unavailable() from exc
+        return await bq_dc.list_markets(region=region)
+    except BigQueryNotConfiguredError as exc:
+        raise _bq_unavailable(exc) from exc
 
 
 @router.get("/dcs")
@@ -177,9 +169,9 @@ async def get_dcs(
     market: str | None = Query(default=None),
 ) -> list[dict[str, Any]]:
     try:
-        return await dc_oracle.list_dcs(region=region, market=market)
-    except OracleNotConfiguredError as exc:
-        raise _oracle_unavailable() from exc
+        return await bq_dc.list_dcs(region=region, market=market)
+    except BigQueryNotConfiguredError as exc:
+        raise _bq_unavailable(exc) from exc
 
 
 @router.get("/dcs/{dc_id}/locations")

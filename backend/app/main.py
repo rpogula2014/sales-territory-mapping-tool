@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.router import api_router
 from app.core.config import get_settings
-from app.services import dc_oracle, msa_client
+from app.services import msa_client
 
 
 settings = get_settings()
@@ -23,7 +23,6 @@ app.include_router(api_router, prefix="/api")
 
 @app.on_event("shutdown")
 async def _shutdown() -> None:
-    await dc_oracle.close_pool()
     await msa_client.close_client()
 
 

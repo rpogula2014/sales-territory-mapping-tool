@@ -5,7 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     app_name: str = "Sales Territory Mapping API"
     database_url: str = Field(
@@ -24,13 +24,6 @@ class Settings(BaseSettings):
     import_worker_concurrency: int = 1
     assignment_event_retention_days: int = 548
 
-    # Oracle (XXATDAR_DC_REG_MKT_TBL etc). Leave empty to disable live endpoints.
-    oracle_user: str = ""
-    oracle_password: str = ""
-    oracle_dsn: str = ""  # e.g. "host:1521/service" or full TNS
-    oracle_pool_min: int = 1
-    oracle_pool_max: int = 4
-
     # prod-msa REST host for live customer location data.
     msa_base_url: str = "https://prod-msa.gcp.atd-us.com"
     msa_timeout_seconds: float = 15.0
@@ -39,6 +32,7 @@ class Settings(BaseSettings):
     # BigQuery metrics source (Phase 2 POC). Eventually replaced by an API call.
     bigquery_project: str = "atd-cdp-prod"
     bq_metrics_cache_ttl_seconds: int = 300
+    bq_dc_cache_ttl_seconds: int = 3600
 
     # MapTiler proxy — API key kept server-side; frontend hits /api/map/* only.
     maptiler_api_key: str = ""
