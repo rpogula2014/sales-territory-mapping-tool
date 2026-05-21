@@ -1,0 +1,91 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Import Excel</h1>
+    </div>
+    <a routerLink="/markets">Back to markets</a>
+  </header>
+
+  <form class="form" (submit)="$event.preventDefault(); upload()">
+    <label>
+      <span>Dataset name</span>
+      <input
+        type="text"
+        [value]="datasetName()"
+        (input)="setName($any($event.target).value)"
+        placeholder="e.g. SoCal April 2026"
+      />
+    </label>
+
+    <label>
+      <span>Market</span>
+      <select
+        [value]="marketId()"
+        (change)="setMarket($any($event.target).value)"
+      >
+        <option value="">Choose market</option>
+        @for (market of markets(); track market.id) {
+          <option [value]="market.id">{{ market.name }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="file">
+      <span>Excel file</span>
+      <input type="file" accept=".xlsx" (change)="onFile($event)" />
+    </label>
+
+    <div class="actions">
+      <button type="submit" class="is-primary" [disabled]="!canUpload()">
+        @if (importing()) { Uploading... } @else { Start import }
+      </button>
+      @if (file(); as f) {
+        <span class="muted small">{{ f.name }}</span>
+      }
+    </div>
+
+    @if (validationError(); as msg) {
+      <p class="error">{{ msg }}</p>
+    }
+    @if (error(); as msg) {
+      <p class="error">{{ msg }}</p>
+    }
+  </form>
+
+  @if (status(); as current) {
+    <section class="status">
+      <header>
+        <h2>Import progress</h2>
+        <span class="badge">{{ current.status }}</span>
+      </header>
+
+      <div class="progress">
+        <div class="progress__fill" [style.width.%]="progressPct()"></div>
+      </div>
+
+      <dl>
+        <div>
+          <dt>Processed</dt>
+          <dd>{{ current.processedCount }} / {{ current.rowCount }}</dd>
+        </div>
+        <div>
+          <dt>Geocoded</dt>
+          <dd>{{ current.geocodeSuccessCount }}</dd>
+        </div>
+        <div>
+          <dt>Failed</dt>
+          <dd>{{ current.geocodeFailureCount }}</dd>
+        </div>
+      </dl>
+
+      @if (current.warnings.length > 0) {
+        <ul class="warnings">
+          @for (warning of current.warnings; track $index) {
+            <li>{{ warning }}</li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</main>

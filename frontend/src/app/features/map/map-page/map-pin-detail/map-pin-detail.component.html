@@ -1,0 +1,52 @@
+<section class="detail">
+  <header>
+    <h2>{{ prop('accountName') }}</h2>
+    <span class="muted">#{{ prop('customerNumber') }}</span>
+  </header>
+
+  <dl>
+    <div>
+      <dt>Current seller</dt>
+      <dd>{{ prop('currentSeller') }}</dd>
+    </div>
+    <div>
+      <dt>Suggested</dt>
+      <dd>{{ prop('suggestedSeller') }}</dd>
+    </div>
+    <div>
+      <dt>TTM volume</dt>
+      <dd>{{ prop('ttmVolume') }}</dd>
+    </div>
+    <div>
+      <dt>DC</dt>
+      <dd>{{ prop('dc') }}</dd>
+    </div>
+    <div>
+      <dt>Primary program</dt>
+      <dd>{{ prop('primaryProgram') }}</dd>
+    </div>
+    <div>
+      <dt>Secondary program</dt>
+      <dd>{{ prop('secondaryProgram') }}</dd>
+    </div>
+  </dl>
+
+  <label>
+    <span>Assign seller</span>
+    <select [value]="assignmentSellerId()" (change)="onSelect($event)">
+      <option value="">Choose seller</option>
+      @for (seller of sellers(); track seller.id) {
+        <option [value]="seller.id">{{ seller.displayName }}</option>
+      }
+    </select>
+  </label>
+
+  <button
+    type="button"
+    class="is-primary"
+    [disabled]="!assignmentSellerId() || saving()"
+    (click)="save.emit()"
+  >
+    @if (saving()) { Saving... } @else { Save assignment }
+  </button>
+</section>

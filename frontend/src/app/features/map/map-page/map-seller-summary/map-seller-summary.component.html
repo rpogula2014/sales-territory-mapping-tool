@@ -1,0 +1,21 @@
+<section class="summary">
+  <header>
+    <h2>Seller summary</h2>
+    <span class="muted">{{ rows().length }} visible</span>
+  </header>
+
+  @if (rows().length === 0) {
+    <p class="muted small">No matching accounts.</p>
+  }
+
+  <ul>
+    @for (row of rows(); track row.sellerId) {
+      <li>
+        <span class="dot" [style.background]="row.color"></span>
+        <span class="name">{{ row.displayName }}</span>
+        <span class="count">{{ row.count }}</span>
+        <span class="ttm">{{ formatVolume(row.ttmTotal) }}</span>
+      </li>
+    }
+  </ul>
+</section>

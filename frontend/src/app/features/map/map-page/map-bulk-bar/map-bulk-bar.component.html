@@ -1,0 +1,28 @@
+<section class="bulk">
+  <div class="count">
+    <strong>{{ selectedCount() }}</strong>
+    <span>selected</span>
+  </div>
+
+  <label>
+    <span>Bulk assign</span>
+    <select [value]="assignmentSellerId()" (change)="onSelect($event)">
+      <option value="">Choose seller</option>
+      @for (seller of sellers(); track seller.id) {
+        <option [value]="seller.id">{{ seller.displayName }}</option>
+      }
+    </select>
+  </label>
+
+  <div class="actions">
+    <button type="button" (click)="clear.emit()">Clear</button>
+    <button
+      type="button"
+      class="is-primary"
+      [disabled]="!assignmentSellerId() || saving()"
+      (click)="save.emit()"
+    >
+      @if (saving()) { Saving... } @else { Assign {{ selectedCount() }} }
+    </button>
+  </div>
+</section>

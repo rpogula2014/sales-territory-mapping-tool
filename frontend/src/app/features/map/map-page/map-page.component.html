@@ -1,0 +1,89 @@
+<div class="shell">
+  <aside class="sidebar">
+    <header class="brand">
+      <a routerLink="/markets" class="back">← Markets</a>
+      <h1>Territory map</h1>
+    </header>
+
+    <section class="counts">
+      <div>
+        <strong>{{ totalCount() }}</strong>
+        <span>total</span>
+      </div>
+      <div>
+        <strong>{{ visiblePinCount() }}</strong>
+        <span>visible</span>
+      </div>
+      <div>
+        <strong>{{ selectedCount() }}</strong>
+        <span>selected</span>
+      </div>
+    </section>
+
+    <atd-map-filters
+      [filters]="filters()"
+      [sellers]="sellers()"
+      [dcs]="dcs()"
+      [primaryPrograms]="primaryPrograms()"
+      [secondaryPrograms]="secondaryPrograms()"
+      (filtersChange)="onFiltersChange($event)"
+      (cleared)="onFiltersClear()"
+    />
+
+    <atd-map-seller-summary
+      [features]="accounts()?.features ?? []"
+      [sellers]="sellers()"
+    />
+
+    @if (statusMessage(); as msg) {
+      <p class="status">{{ msg }}</p>
+    }
+
+    @if (firstSelected(); as feature) {
+      @if (feature.properties; as props) {
+        <atd-map-pin-detail
+          [account]="props"
+          [sellers]="sellers()"
+          [assignmentSellerId]="assignmentSellerId()"
+          [saving]="saving()"
+          (assignmentSellerIdChange)="onAssignmentSellerChange($event)"
+          (save)="saveSingle()"
+        />
+      }
+    }
+  </aside>
+
+  <section class="map-wrap">
+    <header class="toolbar">
+      <button
+        type="button"
+        [class.is-primary]="rectangleSelectMode()"
+        (click)="toggleRectangleSelect()"
+      >
+        @if (rectangleSelectMode()) { Selecting... } @else { Rectangle select }
+      </button>
+      <div class="spacer"></div>
+      <button type="button" (click)="exportFiltered()">Export filtered</button>
+      <button type="button" class="is-primary" (click)="exportAll()">Export full</button>
+    </header>
+
+    <div #mapContainer class="map"></div>
+    <div #selectionBox class="selection-box"></div>
+
+    @if (loading()) {
+      <div class="loading">Loading accounts...</div>
+    }
+
+    @if (selectedCount() > 1) {
+      <atd-map-bulk-bar
+        [selectedCount]="selectedCount()"
+        [sellers]="sellers()"
+        [assignmentSellerId]="assignmentSellerId()"
+        [saving]="saving()"
+        (assignmentSellerIdChange)="onAssignmentSellerChange($event)"
+        (save)="saveBulk()"
+        (clear)="clearSelection()"
+      />
+    }
+  </section>
+</div>

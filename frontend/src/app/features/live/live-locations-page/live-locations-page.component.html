@@ -1,0 +1,283 @@
+<main class="page">
+  <header class="page-header">
+    <div class="page-header__lead">
+      <a class="crumb" routerLink="/live/dcs">
+        <span class="crumb__arrow">←</span>
+        <span class="crumb__text">All DCs</span>
+      </a>
+      <div class="page-header__title">
+        <h1>{{ $any(currentDc()?.dc_name) || 'Locations' }}</h1>
+      </div>
+      @if (currentDc(); as dc) {
+        <p class="page-header__lede">
+          <span class="region-pill">{{ $any(dc.region) || '—' }}</span>
+          <span class="muted">{{ $any(dc.market) || '' }}</span>
+        </p>
+      }
+    </div>
+
+    <div class="header-actions">
+      <a class="cta cta--ghost" [routerLink]="['/live/dcs', dcId(), 'map']">
+        <span>Map view</span><span class="cta__arrow">→</span>
+      </a>
+      <label class="search-wrap">
+        <span class="search-wrap__glyph">⌕</span>
+        <input
+          class="search"
+          type="search"
+          placeholder="Filter locations…"
+          (input)="onSearch($event)"
+        />
+      </label>
+    </div>
+  </header>
+
+  <div class="chips">
+    @for (item of statusCounts(); track item.status) {
+      <button
+        type="button"
+        class="chip chip--{{ item.status }}"
+        [class.chip--active]="isStatusActive(item.status)"
+        (click)="toggleStatus(item.status)"
+      >
+        <span class="chip__dot"></span>
+        <span class="chip__label">{{ item.status }}</span>
+        <span class="chip__count">{{ item.count }}</span>
+      </button>
+    }
+    <button
+      type="button"
+      class="status-help-btn"
+      [class.status-help-btn--on]="showStatusHelp()"
+      (click)="toggleStatusHelp()"
+      [attr.aria-expanded]="showStatusHelp()"
+      title="What do these statuses mean?"
+    >ⓘ</button>
+
+    <span class="chip-divider" aria-hidden="true"></span>
+
+    <button
+      type="button"
+      class="chip chip--coords"
+      [class.chip--active]="coordsFilter() === 'all'"
+      (click)="setCoordsFilter('all')"
+      title="All locations"
+    >
+      <span class="chip__label">All coords</span>
+      <span class="chip__count">{{ coordsCounts().all }}</span>
+    </button>
+    <button
+      type="button"
+      class="chip chip--coords chip--mapped"
+      [class.chip--active]="coordsFilter() === 'mapped'"
+      (click)="setCoordsFilter('mapped')"
+      title="Locations with lat/lng — visible on the map"
+    >
+      <span class="chip__dot"></span>
+      <span class="chip__label">On map</span>
+      <span class="chip__count">{{ coordsCounts().mapped }}</span>
+    </button>
+    <button
+      type="button"
+      class="chip chip--coords chip--missing"
+      [class.chip--active]="coordsFilter() === 'missing'"
+      (click)="setCoordsFilter('missing')"
+      title="Locations with no lat/lng — not on the map"
+    >
+      <span class="chip__dot"></span>
+      <span class="chip__label">Missing coords</span>
+      <span class="chip__count">{{ coordsCounts().missing }}</span>
+    </button>
+  </div>
+
+  @if (showStatusHelp()) {
+    <aside class="status-help" role="region" aria-label="Status legend">
+      <dl class="status-help__list">
+        <div class="status-help__row">
+          <dt><span class="status-help__dot status-help__dot--unchanged"></span> Unchanged</dt>
+          <dd>You haven't touched this location — seller shown is whatever source (prod-msa) says.</dd>
+        </div>
+        <div class="status-help__row">
+          <dt><span class="status-help__dot status-help__dot--assigned"></span> Assigned</dt>
+          <dd>You saved an assignment and source already matches. Nothing to push.</dd>
+        </div>
+        <div class="status-help__row">
+          <dt><span class="status-help__dot status-help__dot--changed"></span> Changed</dt>
+          <dd>You moved this location to a new seller. Source still has the old seller — this is the export queue.</dd>
+        </div>
+        <div class="status-help__row">
+          <dt><span class="status-help__dot status-help__dot--stale"></span> Stale</dt>
+          <dd>Source updated underneath your assignment. Open the row and choose <em>Accept source</em> or <em>Reconfirm</em>.</dd>
+        </div>
+      </dl>
+    </aside>
+  }
+
+  @if (error(); as e) {
+    <p class="note note--error">{{ e }}</p>
+  }
+  @if (saveMessage(); as m) {
+    <p class="note note--info">{{ m }}</p>
+  }
+
+  @if (bulkCount() > 0) {
+    <div class="bulk-bar">
+      <div class="bulk-bar__left">
+        <span class="bulk-bar__dot"></span>
+        <strong>{{ bulkCount() }}</strong>
+        <span class="muted">selected</span>
+      </div>
+      <div class="bulk-bar__right">
+        <select class="bulk-bar__select" (change)="onBulkSellerChange($event)">
+          <option value="">— assign seller —</option>
+          @for (opt of sellerOptions(); track opt.id) {
+            <option [value]="opt.id">{{ opt.name }}</option>
+          }
+        </select>
+        <button class="btn btn--primary" type="button" [disabled]="bulkSaving()" (click)="applyBulk()">
+          {{ bulkSaving() ? 'Saving…' : 'Apply' }}
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="state">
+      <span class="state__pulse"></span>
+      <span>Loading locations + metrics…</span>
+    </div>
+  } @else if (locations().length === 0) {
+    <div class="state state--empty">
+      <p class="state__title">No locations found.</p>
+      <p class="state__hint">This DC may be inactive or the upstream returned no SHIP_TO rows.</p>
+    </div>
+  } @else {
+    <div class="content" [class.content--with-panel]="!!selectedRow()">
+      <atd-live-filter-sidebar />
+      <div class="table-col">
+        <div class="pager">
+          <div class="pager__controls">
+            <button type="button" class="btn btn--icon" (click)="goToPage(0)" [disabled]="pageIndex() === 0" aria-label="First page">‹‹</button>
+            <button type="button" class="btn btn--icon" (click)="prevPage()" [disabled]="pageIndex() === 0" aria-label="Previous page">‹</button>
+            <span class="pager__page">
+              <span class="pager__page-label">Page</span>
+              <span class="pager__page-num">{{ pageIndex() + 1 }}</span>
+              <span class="pager__page-sep">/</span>
+              <span class="pager__page-of">{{ pageCount() }}</span>
+            </span>
+            <button type="button" class="btn btn--icon" (click)="nextPage()" [disabled]="pageIndex() >= pageCount() - 1" aria-label="Next page">›</button>
+            <button type="button" class="btn btn--icon" (click)="goToPage(pageCount() - 1)" [disabled]="pageIndex() >= pageCount() - 1" aria-label="Last page">››</button>
+          </div>
+          <div class="pager__meta">
+            <span class="pager__range">
+              {{ pageStart() }}–{{ pageEnd() }}
+              <span class="muted">of {{ sorted().length }}</span>
+              @if (sorted().length !== locations().length) {
+                <span class="muted">· filtered from {{ locations().length }}</span>
+              }
+            </span>
+            <label class="rows-select">
+              <span>Rows</span>
+              <select (change)="onPageSize($event)">
+                <option [value]="25" [selected]="pageSize() === 25">25</option>
+                <option [value]="50" [selected]="pageSize() === 50">50</option>
+                <option [value]="100" [selected]="pageSize() === 100">100</option>
+                <option [value]="250" [selected]="pageSize() === 250">250</option>
+              </select>
+            </label>
+          </div>
+        </div>
+        <div class="table-card">
+          <div class="table-wrap">
+            <table class="locations">
+              <thead>
+                <tr>
+                  <th class="check-col">
+                    <input
+                      type="checkbox"
+                      [checked]="bulkCount() === view().length && view().length > 0"
+                      (change)="toggleBulkAll()"
+                    />
+                  </th>
+                  <th>Status</th>
+                  <th class="sortable" (click)="sortBy('locationNumber')">Loc #</th>
+                  <th class="sortable" (click)="sortBy('dba_name')">DBA</th>
+                  <th class="sortable" (click)="sortBy('city_name')">City</th>
+                  <th>State</th>
+                  <th class="num">Lat</th>
+                  <th class="num">Lng</th>
+                  <th>Geo src</th>
+                  <th class="sortable" (click)="sortBy('salesrepName')">Live seller</th>
+                  <th>Assigned</th>
+                  <th class="sortable" (click)="sortBy('delivery_tier')">Tier</th>
+                  <th>Tire Pros</th>
+                  <th class="num sortable" (click)="sortBy('ytdsales')">YTD sales</th>
+                  <th class="num sortable" (click)="sortBy('mtdsales')">MTD sales</th>
+                  <th class="num">YoY Δ</th>
+                  <th>Class</th>
+                  <th>Channel</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of view(); track row.siteUseID) {
+                  <tr (click)="selectRow(row)" [class.selected]="row.siteUseID === selectedSiteUseID()">
+                    <td class="check-col" (click)="$event.stopPropagation()">
+                      <input
+                        type="checkbox"
+                        [checked]="isBulkSelected(row)"
+                        (change)="toggleBulk(row, $event)"
+                      />
+                    </td>
+                    <td>
+                      @if (row.assignment) {
+                        <span class="pill pill--{{ row.assignment.status }}">
+                          <span class="pill__dot"></span>
+                          {{ row.assignment.status }}
+                        </span>
+                      }
+                    </td>
+                    <td class="mono">{{ row.locationNumber }}</td>
+                    <td class="strong" [title]="row.dba_name || ''">{{ row.dba_name || '—' }}</td>
+                    <td [title]="row.city_name || ''">{{ row.city_name || '—' }}</td>
+                    <td class="mono">{{ row.state_cd || '—' }}</td>
+                    <td class="num">{{ row.latitude != null ? row.latitude : '—' }}</td>
+                    <td class="num">{{ row.longitude != null ? row.longitude : '—' }}</td>
+                    <td>
+                      @if (row.lat_source === 'census') {
+                        <span class="src-badge src-badge--census">census</span>
+                      } @else if (row.lat_source === 'source') {
+                        <span class="src-badge src-badge--source">source</span>
+                      } @else {
+                        <span class="src-badge src-badge--missing">none</span>
+                      }
+                    </td>
+                    <td [title]="row.salesrepName || ''">{{ row.salesrepName || '—' }}</td>
+                    <td [title]="row.assignment?.sellerName || ''">{{ row.assignment?.sellerName || '—' }}</td>
+                    <td class="mono">{{ row.delivery_tier || '—' }}</td>
+                    <td class="num">{{ row.tire_pros === 'Y' ? '✓' : '—' }}</td>
+                    <td class="num">{{ currency(row.ytdsales) }}</td>
+                    <td class="num">{{ currency(row.mtdsales) }}</td>
+                    <td class="num" [class.neg]="yoyDelta(row) < 0">{{ yoyPct(row) }}</td>
+                    <td>{{ row.customer_class_name || '—' }}</td>
+                    <td>{{ row.customer_channel_name || '—' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      @if (selectedRow(); as r) {
+        <atd-live-assign-panel
+          [row]="r"
+          [dcId]="dcId()"
+          [dcName]="$any(currentDc()?.dc_name) ?? null"
+          [market]="$any(currentDc()?.market) ?? null"
+          [region]="$any(currentDc()?.region) ?? null"
+          (close)="closePanel()"
+        />
+      }
+    </div>
+  }
+</main>

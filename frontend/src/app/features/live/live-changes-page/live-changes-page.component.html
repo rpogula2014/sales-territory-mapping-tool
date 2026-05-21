@@ -1,0 +1,204 @@
+<main class="page">
+  <header class="page-header">
+    <div class="page-header__lead">
+      <a class="crumb" routerLink="/live/dcs">
+        <span class="crumb__arrow">←</span>
+        <span class="crumb__text">All DCs</span>
+      </a>
+      <h1>
+        Live assignment changes
+        <button
+          type="button"
+          class="status-help-btn"
+          [class.status-help-btn--on]="showStatusHelp()"
+          (click)="toggleStatusHelp()"
+          [attr.aria-expanded]="showStatusHelp()"
+          title="What do these statuses mean?"
+        >ⓘ</button>
+      </h1>
+      <p class="page-header__lede">
+        Cross-DC view of every locally overridden seller assignment. Filter, export, or accept source in bulk.
+      </p>
+      @if (showStatusHelp()) {
+        <aside class="status-help" role="region" aria-label="Status legend">
+          <dl class="status-help__list">
+            <div class="status-help__row">
+              <dt><span class="status-help__dot status-help__dot--unchanged"></span> Unchanged</dt>
+              <dd>Not yet touched — seller is whatever source (prod-msa) says.</dd>
+            </div>
+            <div class="status-help__row">
+              <dt><span class="status-help__dot status-help__dot--assigned"></span> Assigned</dt>
+              <dd>Local assignment matches source. Nothing to push.</dd>
+            </div>
+            <div class="status-help__row">
+              <dt><span class="status-help__dot status-help__dot--changed"></span> Changed</dt>
+              <dd>User moved this location to a new seller; source still has the old seller — export queue.</dd>
+            </div>
+            <div class="status-help__row">
+              <dt><span class="status-help__dot status-help__dot--stale"></span> Stale</dt>
+              <dd>Source updated underneath the local assignment. Open the row and pick <em>Accept source</em> or <em>Reconfirm</em>.</dd>
+            </div>
+          </dl>
+        </aside>
+      }
+    </div>
+    @if (summary(); as s) {
+      <div class="meter" role="group" aria-label="Assignment status">
+        <div class="meter__row">
+          <span class="meter__num">{{ s.changed }}</span>
+          <span class="meter__sep">/</span>
+          <span class="meter__den">{{ s.total }}</span>
+        </div>
+        <span class="meter__label">changed · total</span>
+        <div class="meter__bar">
+          <span
+            class="meter__fill"
+            [style.width.%]="s.total ? (s.changed / s.total) * 100 : 0"
+          ></span>
+        </div>
+      </div>
+    }
+  </header>
+
+  <section class="rail">
+    <div class="rail__group">
+      <label class="field">
+        <span class="field__label">Region</span>
+        <input class="field__input" type="search" [value]="fRegion()" (input)="setRegion($event)" placeholder="—" />
+      </label>
+      <label class="field">
+        <span class="field__label">Market</span>
+        <input class="field__input" type="search" [value]="fMarket()" (input)="setMarket($event)" placeholder="—" />
+      </label>
+      <label class="field">
+        <span class="field__label">DC</span>
+        <select class="field__input" [value]="fDc()" (change)="setDc($event)">
+          <option value="">All</option>
+          @for (opt of dcOptions(); track opt.dcId) {
+            <option [value]="opt.dcId">{{ opt.dcName }}</option>
+          }
+        </select>
+      </label>
+      <label class="field">
+        <span class="field__label">Assigned by</span>
+        <input class="field__input" type="search" [value]="fAssignedBy()" (input)="setAssignedBy($event)" placeholder="email" />
+      </label>
+
+      <label class="toggle" [class.toggle--on]="fOnlyChanged()">
+        <input type="checkbox" [checked]="fOnlyChanged()" (change)="setOnlyChanged($event)" />
+        <span class="toggle__dot"></span>
+        <span class="toggle__text">Only changed</span>
+      </label>
+    </div>
+
+    <div class="rail__actions">
+      <button class="btn btn--primary" type="button" (click)="reload()">Apply</button>
+      <button class="btn" type="button" (click)="exportCsv()" title="Download all matching rows as CSV">
+        <span class="btn__glyph">↓</span> Export CSV
+      </button>
+    </div>
+  </section>
+
+  @if (error(); as e) {
+    <p class="note note--error">{{ e }}</p>
+  }
+  @if (message(); as m) {
+    <p class="note note--info">{{ m }}</p>
+  }
+
+  @if (selectedCount() > 0) {
+    <div class="bulk-bar">
+      <div class="bulk-bar__left">
+        <span class="bulk-bar__dot"></span>
+        <strong>{{ selectedCount() }}</strong>
+        <span class="muted">selected</span>
+      </div>
+      <button class="btn btn--danger" type="button" (click)="bulkRevert()">
+        Accept source ({{ selectedCount() }})
+      </button>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="state">
+      <span class="state__pulse"></span>
+      <span>Loading changes…</span>
+    </div>
+  } @else if (page(); as p) {
+    @if (p.rows.length === 0) {
+      <div class="state state--empty">
+        <p class="state__title">No assignment changes match the filters.</p>
+        <p class="state__hint">Try widening the search or clearing the "Only changed" toggle.</p>
+      </div>
+    } @else {
+      <section class="table-card">
+        <div class="table-card__head">
+          <span class="table-card__title">Assignments</span>
+          <span class="table-card__count">{{ p.rows.length }} of {{ p.total }}</span>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th class="check-col">
+                  <input
+                    type="checkbox"
+                    [checked]="selectedCount() === p.rows.length && p.rows.length > 0"
+                    (change)="toggleAll(p.rows)"
+                  />
+                </th>
+                <th>DC</th>
+                <th>Region</th>
+                <th>Market</th>
+                <th class="num">Loc #</th>
+                <th class="num">Site</th>
+                <th>Previous seller</th>
+                <th>Current seller</th>
+                <th class="status-col">Status</th>
+                <th>By</th>
+                <th>At</th>
+                <th class="num">v</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of p.rows; track row.siteUseID) {
+                <tr [class.selected]="isSelected(row.siteUseID)">
+                  <td class="check-col">
+                    <input
+                      type="checkbox"
+                      [checked]="isSelected(row.siteUseID)"
+                      (change)="toggleOne(row.siteUseID)"
+                    />
+                  </td>
+                  <td>
+                    <span class="dc-name">{{ row.dcName || '—' }}</span>
+                  </td>
+                  <td>{{ row.region || '—' }}</td>
+                  <td>{{ row.market || '—' }}</td>
+                  <td class="num">{{ row.locationNumber || '—' }}</td>
+                  <td class="num">{{ row.siteUseID }}</td>
+                  <td>{{ row.previousSellerName || '—' }}</td>
+                  <td class="strong">{{ row.currentSellerName || '—' }}</td>
+                  <td class="status-col">
+                    @if (row.assignmentChanged) {
+                      <span class="pill pill--changed" title="Local assignment differs from source">
+                        <span class="pill__dot"></span> changed
+                      </span>
+                    } @else {
+                      <span class="pill pill--same" title="Matches source">
+                        <span class="pill__dot"></span> same
+                      </span>
+                    }
+                  </td>
+                  <td class="mono">{{ row.assignedBy }}</td>
+                  <td class="mono small">{{ row.assignedAt }}</td>
+                  <td class="num mono">{{ row.version }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  }
+</main>

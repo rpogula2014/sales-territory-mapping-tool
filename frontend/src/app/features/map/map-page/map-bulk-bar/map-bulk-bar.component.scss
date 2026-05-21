@@ -1,0 +1,37 @@
+:host { display: block; }
+
+.bulk {
+  position: absolute;
+  left: 50%;
+  bottom: var(--space-5);
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-2);
+  padding: var(--space-3) var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  z-index: 3;
+}
+
+.count {
+  display: grid;
+  gap: 0;
+}
+
+.count strong { font-size: var(--fz-18); }
+.count span { font-size: var(--fz-12); color: var(--color-text-subtle); }
+
+label {
+  display: grid;
+  gap: 2px;
+  font-size: var(--fz-12);
+  color: var(--color-text-muted);
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}

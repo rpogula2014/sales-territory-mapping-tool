@@ -1,0 +1,85 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Sales operations</p>
+      <h1>Territory mapping</h1>
+    </div>
+    <div class="header-actions">
+      <a class="cta cta--ghost" routerLink="/admin/markets">Manage markets</a>
+      <a class="cta" routerLink="/admin/import">Import Excel</a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p class="muted">Loading datasets...</p>
+  }
+
+  @if (removeMessage(); as msg) {
+    <p class="message">{{ msg }}</p>
+  }
+
+  @if (!loading() && groups().length === 0) {
+    <section class="empty">
+      <h2>No markets yet</h2>
+      <p>Import an Excel file to get started.</p>
+      <a class="cta" routerLink="/admin/import">Import Excel</a>
+    </section>
+  }
+
+  @for (group of groups(); track group.market.id) {
+    <section class="group">
+      <header class="group-header">
+        <h2>{{ group.market.name }}</h2>
+        <span class="muted">{{ group.datasets.length }} dataset(s)</span>
+      </header>
+
+      @if (group.datasets.length === 0) {
+        <p class="muted small">No datasets imported.</p>
+      }
+
+      <div class="dataset-grid">
+        @for (dataset of group.datasets; track dataset.id) {
+          <article class="dataset-card">
+            <a class="dataset-card__link" [routerLink]="['/map', dataset.id]">
+              <div class="dataset-card__head">
+                <strong>{{ dataset.name }}</strong>
+                @if (dataset.is_active) {
+                  <span class="badge badge--active">Active</span>
+                }
+              </div>
+              <dl>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{{ dataset.import_status }}</dd>
+                </div>
+                <div>
+                  <dt>Rows</dt>
+                  <dd>{{ dataset.row_count }}</dd>
+                </div>
+              </dl>
+            </a>
+
+            <footer class="dataset-card__foot">
+              @if (isConfirming(dataset)) {
+                <span class="muted small">Remove this dataset?</span>
+                <button type="button" (click)="cancelConfirm($event)">Cancel</button>
+                <button
+                  type="button"
+                  class="danger"
+                  [disabled]="isRemoving(dataset)"
+                  (click)="confirmRemove($event, dataset)"
+                >
+                  @if (isRemoving(dataset)) { Removing... } @else { Confirm }
+                </button>
+              } @else {
+                <button type="button" class="link-danger" (click)="askConfirm($event, dataset)">
+                  Remove
+                </button>
+              }
+            </footer>
+          </article>
+        }
+      </div>
+    </section>
+  }
+</main>

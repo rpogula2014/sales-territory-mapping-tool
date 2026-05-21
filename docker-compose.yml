@@ -1,0 +1,15 @@
+services:
+  db:
+    container_name: sales-territory-db
+    image: imresamu/postgis:16-3.5-alpine
+    environment:
+      POSTGRES_DB: territory
+      POSTGRES_USER: territory
+      POSTGRES_PASSWORD: territory
+    ports:
+      - "55432:5432"
+    volumes:
+      - sales-territory-db:/var/lib/postgresql/data
+
+volumes:
+  sales-territory-db:

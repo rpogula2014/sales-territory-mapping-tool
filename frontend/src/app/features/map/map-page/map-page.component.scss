@@ -1,0 +1,105 @@
+:host {
+  display: block;
+  height: 100vh;
+  background: var(--color-bg);
+}
+
+.shell {
+  height: 100vh;
+  display: grid;
+  grid-template-columns: var(--sidebar-w) 1fr;
+}
+
+.sidebar {
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  padding: var(--space-4);
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  overflow-y: auto;
+}
+
+.brand { display: grid; gap: var(--space-1); }
+.brand .back {
+  font-size: var(--fz-12);
+  color: var(--color-text-subtle);
+}
+.brand h1 {
+  margin: 0;
+  font-size: var(--fz-18);
+  letter-spacing: -0.01em;
+}
+
+.counts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-2);
+}
+
+.counts div {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  text-align: center;
+}
+
+.counts strong { font-size: var(--fz-18); font-variant-numeric: tabular-nums; }
+.counts span { font-size: var(--fz-12); color: var(--color-text-subtle); }
+
+.status {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent-soft);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 25%, transparent);
+  border-radius: var(--radius-sm);
+  font-size: var(--fz-13);
+  color: var(--color-accent-strong);
+}
+
+.map-wrap {
+  position: relative;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.toolbar .spacer { flex: 1; }
+
+.map { width: 100%; height: 100%; }
+
+.selection-box {
+  display: none;
+  position: absolute;
+  border: 2px solid var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 14%, transparent);
+  pointer-events: none;
+  z-index: 2;
+  border-radius: var(--radius-sm);
+}
+
+.loading {
+  position: absolute;
+  top: var(--space-5);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--fz-13);
+  box-shadow: var(--shadow-2);
+  z-index: 3;
+}

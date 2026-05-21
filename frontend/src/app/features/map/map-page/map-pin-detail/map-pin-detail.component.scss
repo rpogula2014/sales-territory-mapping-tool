@@ -1,0 +1,43 @@
+:host { display: block; }
+
+.detail {
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--space-4);
+  display: grid;
+  gap: var(--space-3);
+}
+
+header {
+  display: grid;
+  gap: 2px;
+}
+
+h2 {
+  margin: 0;
+  font-size: var(--fz-16);
+}
+
+.muted {
+  font-family: var(--font-mono);
+  font-size: var(--fz-12);
+  color: var(--color-text-subtle);
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+dl > div { display: grid; gap: 2px; }
+dt { font-size: var(--fz-12); color: var(--color-text-subtle); margin: 0; }
+dd { font-size: var(--fz-13); margin: 0; }
+
+label {
+  display: grid;
+  gap: var(--space-1);
+  font-size: var(--fz-12);
+  color: var(--color-text-muted);
+}
+label > span { font-weight: 500; }

@@ -1,0 +1,87 @@
+<main class="page">
+  <header class="page-header">
+    <div class="page-header__lead">
+      <p class="eyebrow">Live data</p>
+      <h1>Pick a distribution center</h1>
+      <p class="page-header__lede">
+        Browse DCs straight from Oracle. Filter by region or market, then drill into live locations and assign sellers.
+      </p>
+    </div>
+    <div class="meter">
+      <div class="meter__row">
+        <span class="meter__num">{{ dcs().length }}</span>
+        <span class="meter__sep">/</span>
+        <span class="meter__den">DC{{ dcs().length === 1 ? '' : 's' }}</span>
+      </div>
+      <span class="meter__label">matching filters</span>
+    </div>
+  </header>
+
+  <section class="rail">
+    <div class="rail__group">
+      <label class="field">
+        <span class="field__label">Region</span>
+        <div class="select-wrap">
+          <select (change)="onRegionChange($event)" [disabled]="loadingRegions()">
+            <option value="">All regions</option>
+            @for (r of regions(); track r) {
+              <option [value]="r" [selected]="r === selectedRegion()">{{ r }}</option>
+            }
+          </select>
+          <span class="select-wrap__chev">▾</span>
+        </div>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Market</span>
+        <div class="select-wrap">
+          <select
+            (change)="onMarketChange($event)"
+            [disabled]="loadingMarkets() || !selectedRegion()"
+          >
+            <option value="">All markets</option>
+            @for (m of markets(); track m) {
+              <option [value]="m" [selected]="m === selectedMarket()">{{ m }}</option>
+            }
+          </select>
+          <span class="select-wrap__chev">▾</span>
+        </div>
+      </label>
+    </div>
+
+    <a class="link-action" routerLink="/live/changes">
+      View changes log <span class="link-action__arrow">→</span>
+    </a>
+  </section>
+
+  @if (error(); as e) {
+    <p class="note note--error">{{ e }}</p>
+  }
+
+  @if (loadingDcs()) {
+    <div class="state">
+      <span class="state__pulse"></span>
+      <span>Loading DCs…</span>
+    </div>
+  } @else if (dcs().length === 0) {
+    <div class="state state--empty">
+      <p class="state__title">No DCs match the current filters.</p>
+      <p class="state__hint">Try widening the region or clearing the market.</p>
+    </div>
+  } @else {
+    <ul class="dc-grid">
+      @for (dc of dcs(); track dcId(dc); let i = $index) {
+        <li class="dc-grid__cell" [style.animation-delay.ms]="staggerMs(i)">
+          <a class="dc-card" [routerLink]="['/live/dcs', dcId(dc), 'locations']">
+            <span class="dc-card__name">{{ dcName(dc) }}</span>
+            <span class="dc-card__meta">
+              <span class="region-pill">{{ dcRegion(dc) }}</span>
+              <span class="market">{{ dcMarket(dc) }}</span>
+            </span>
+            <span class="dc-card__arrow" aria-hidden="true">→</span>
+          </a>
+        </li>
+      }
+    </ul>
+  }
+</main>

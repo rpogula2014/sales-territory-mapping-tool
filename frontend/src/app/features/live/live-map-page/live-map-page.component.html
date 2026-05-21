@@ -1,0 +1,181 @@
+<div class="page">
+  <header class="page-header">
+    <div class="page-header__lead">
+      <p class="crumbs">
+        <a routerLink="/live/dcs">
+          <span class="crumbs__arrow">←</span> All DCs
+        </a>
+        <span class="crumbs__sep">·</span>
+        <a [routerLink]="['/live/dcs', dcId(), 'locations']">Table view</a>
+      </p>
+      <div class="page-header__title">
+        <h1>{{ $any(currentDc()?.dc_name) || 'Map' }}</h1>
+      </div>
+      @if (currentDc(); as dc) {
+        <p class="page-header__lede">
+          <span class="region-pill">{{ $any(dc.region) || '—' }}</span>
+          <span class="muted">{{ $any(dc.market) || '' }}</span>
+        </p>
+      }
+    </div>
+
+    <div class="tools">
+      <button
+        type="button"
+        class="tool-btn"
+        [class.tool-btn--on]="rectangleMode()"
+        (click)="toggleRectangleMode()"
+        title="Drag a box to select multiple locations"
+      >
+        <span class="tool-btn__glyph">{{ rectangleMode() ? '✓' : '▭' }}</span>
+        <span>{{ rectangleMode() ? 'Selecting' : 'Rectangle select' }}</span>
+      </button>
+
+      <button
+        type="button"
+        class="tool-btn"
+        [class.tool-btn--on]="clusterEnabled()"
+        (click)="toggleCluster()"
+        title="Group nearby pins into clusters. Click a cluster to zoom in."
+      >
+        <span class="tool-btn__glyph">◉</span>
+        <span>{{ clusterEnabled() ? 'Clustered' : 'Cluster' }}</span>
+      </button>
+
+      <span class="chip chip--source">
+        <span class="chip__dot"></span>
+        <span class="chip__count">{{ mappable().length - censusCount() }}</span>
+        <span class="chip__label">source</span>
+      </span>
+      <span class="chip chip--census">
+        <span class="chip__dot"></span>
+        <span class="chip__count">{{ censusCount() }}</span>
+        <span class="chip__label">census</span>
+      </span>
+      @if (unmappableCount()) {
+        <span class="chip chip--missing" title="Locations missing lat/lng — not shown on map">
+          <span class="chip__dot"></span>
+          <span class="chip__count">{{ unmappableCount() }}</span>
+          <span class="chip__label">missing</span>
+        </span>
+      }
+    </div>
+  </header>
+
+  @if (error(); as e) {
+    <p class="note note--error">{{ e }}</p>
+  }
+
+  @if (bulkCount() > 0) {
+    <div class="bulk-bar">
+      <div class="bulk-bar__left">
+        <span class="bulk-bar__dot"></span>
+        <strong>{{ bulkCount() }}</strong>
+        <span class="muted">selected</span>
+      </div>
+      <div class="bulk-bar__right">
+        <select class="bulk-bar__select" (change)="onBulkSellerChange($event)">
+          <option value="">— assign seller —</option>
+          @for (opt of sellerOptions(); track opt.id) {
+            <option [value]="opt.id">{{ opt.name }}</option>
+          }
+        </select>
+        <button class="btn btn--primary" type="button" [disabled]="bulkSaving()" (click)="applyBulk()">
+          {{ bulkSaving() ? 'Saving…' : 'Apply' }}
+        </button>
+        <button class="btn" type="button" (click)="clearBulk()">Clear</button>
+      </div>
+    </div>
+  }
+
+  <div class="map-shell">
+    <div class="map-side">
+      <atd-live-filter-sidebar />
+    </div>
+    <div class="map-wrap">
+      <div class="map" #mapContainer></div>
+      <div class="selection-box" #selectionBox></div>
+      @if (legend().length) {
+        <div class="legend">
+          <p class="legend__title">Sellers</p>
+          @if (divergenceCount() > 0) {
+            <p class="legend__hint">
+              <strong>{{ divergenceCount() }}</strong> pin{{ divergenceCount() === 1 ? '' : 's' }}
+              colored by <strong>assigned</strong> seller (differs from live).
+            </p>
+          }
+          <ul>
+            @for (item of legend().slice(0, 12); track item.key) {
+              <li>
+                <label
+                  class="legend__swatch"
+                  [class.legend__swatch--custom]="item.custom"
+                  [style.background]="item.color"
+                  [title]="item.key === 'none' ? 'Unassigned' : 'Click to set color'"
+                >
+                  @if (item.key !== 'none') {
+                    <input
+                      type="color"
+                      [value]="item.color"
+                      (change)="setSellerColor(item.key, $event)"
+                    />
+                  }
+                </label>
+                <span class="legend__name" [title]="item.name">{{ item.name }}</span>
+                @if (item.custom) {
+                  <button
+                    type="button"
+                    class="legend__reset"
+                    title="Reset to default color"
+                    (click)="resetSellerColor(item.key, $event)"
+                  >×</button>
+                }
+                <span class="legend__count">{{ item.count }}</span>
+              </li>
+            }
+            @if (legend().length > 12) {
+              <li class="legend__more">+{{ legend().length - 12 }} more</li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+    @if (selected(); as row) {
+      <aside class="panel">
+        <button class="panel__close" type="button" (click)="closePanel()" aria-label="Close">✕</button>
+        <p class="panel__eyebrow">
+          <span class="mono">Loc {{ row.locationNumber }}</span>
+          <span class="muted">·</span>
+          <span class="mono">Site {{ row.siteUseID }}</span>
+        </p>
+        <h2>{{ row.dba_name || '—' }}</h2>
+        <p class="panel__addr">
+          {{ row.address }}<br />
+          {{ row.city_name }}, {{ row.state_cd }} {{ row.zip_cd }}
+        </p>
+
+        <dl class="kv">
+          <dt>Live seller</dt><dd>{{ row.salesrepName || '—' }}</dd>
+          <dt>Tier</dt><dd class="mono">{{ row.delivery_tier || '—' }}</dd>
+          <dt>Class</dt><dd>{{ row.customer_class_name || '—' }}</dd>
+          <dt>Channel</dt><dd>{{ row.customer_channel_name || '—' }}</dd>
+          <dt>Group</dt><dd>{{ row.customer_group_name || '—' }}</dd>
+          <dt>Tire Pros</dt><dd>{{ row.tire_pros === 'Y' ? 'Yes' : 'No' }}</dd>
+          <dt>YTD sales</dt><dd class="mono">{{ row.ytdsales != null ? '$' + row.ytdsales : '—' }}</dd>
+          <dt>MTD sales</dt><dd class="mono">{{ row.mtdsales != null ? '$' + row.mtdsales : '—' }}</dd>
+          <dt>Source</dt><dd>
+            <span class="src-badge src-badge--{{ row.lat_source || 'missing' }}">{{ row.lat_source || 'none' }}</span>
+          </dd>
+        </dl>
+      </aside>
+    }
+  </div>
+
+  @if (loading()) {
+    <div class="state state--floating">
+      <span class="state__pulse"></span>
+      <span>Loading…</span>
+    </div>
+  }
+</div>

@@ -1,0 +1,85 @@
+<main class="page">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Markets</h1>
+    </div>
+    <a routerLink="/markets">Back to markets</a>
+  </header>
+
+  <form class="create" (submit)="$event.preventDefault(); submit()">
+    <h2>Create market</h2>
+    <div class="row">
+      <label>
+        <span>Name *</span>
+        <input
+          type="text"
+          placeholder="e.g. Southern California"
+          [value]="name()"
+          (input)="setName($any($event.target).value)"
+        />
+      </label>
+      <label>
+        <span>Region <em>(optional)</em></span>
+        <input
+          type="text"
+          placeholder="e.g. West"
+          [value]="region()"
+          (input)="setRegion($any($event.target).value)"
+        />
+      </label>
+    </div>
+    <button type="submit" class="is-primary" [disabled]="!canCreate()">
+      @if (mutating()) { Saving... } @else { Create market }
+    </button>
+  </form>
+
+  @if (message(); as msg) {
+    <p class="message">{{ msg }}</p>
+  }
+
+  <section class="list">
+    <header>
+      <h2>Existing markets</h2>
+      <span class="muted">{{ markets().length }} active</span>
+    </header>
+
+    @if (loading()) {
+      <p class="muted">Loading...</p>
+    }
+
+    @if (!loading() && markets().length === 0) {
+      <p class="muted">No markets yet. Create one above.</p>
+    }
+
+    <ul>
+      @for (market of markets(); track market.id) {
+        <li>
+          <div class="info">
+            <strong>{{ market.name }}</strong>
+            @if (market.region) {
+              <span class="muted">{{ market.region }}</span>
+            }
+          </div>
+
+          @if (isConfirming(market)) {
+            <div class="confirm">
+              <span>Remove?</span>
+              <button type="button" (click)="cancelConfirm()">Cancel</button>
+              <button
+                type="button"
+                class="danger"
+                [disabled]="mutating()"
+                (click)="confirmRemove(market)"
+              >
+                @if (mutating()) { Removing... } @else { Remove }
+              </button>
+            </div>
+          } @else {
+            <button type="button" (click)="askConfirm(market)">Remove</button>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+</main>

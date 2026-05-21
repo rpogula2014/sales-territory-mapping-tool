@@ -1,0 +1,91 @@
+<section class="filters">
+  <header>
+    <h2>Filters</h2>
+    @if (hasActive()) {
+      <button type="button" class="link" (click)="clearAll()">Clear all</button>
+    }
+  </header>
+
+  <label>
+    <span>Seller</span>
+    <select [value]="filters().seller ?? ''" (change)="updateString('seller', $event)">
+      <option value="">All sellers</option>
+      @for (seller of sellers(); track seller.id) {
+        <option [value]="seller.displayName">{{ seller.displayName }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    <span>DC</span>
+    <select [value]="filters().dc ?? ''" (change)="updateString('dc', $event)">
+      <option value="">All DCs</option>
+      @for (dc of dcs(); track dc) {
+        <option [value]="dc">{{ dc }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    <span>Primary program</span>
+    <select
+      [value]="filters().primaryProgram ?? ''"
+      (change)="updateString('primaryProgram', $event)"
+    >
+      <option value="">Any</option>
+      @for (program of primaryPrograms(); track program) {
+        <option [value]="program">{{ program }}</option>
+      }
+    </select>
+  </label>
+
+  <label>
+    <span>Secondary program</span>
+    <select
+      [value]="filters().secondaryProgram ?? ''"
+      (change)="updateString('secondaryProgram', $event)"
+    >
+      <option value="">Any</option>
+      @for (program of secondaryPrograms(); track program) {
+        <option [value]="program">{{ program }}</option>
+      }
+    </select>
+  </label>
+
+  <fieldset class="ttm">
+    <legend>TTM volume</legend>
+    <input
+      type="number"
+      inputmode="numeric"
+      placeholder="Min"
+      [value]="filters().ttmMin ?? ''"
+      (input)="updateNumber('ttmMin', $event)"
+    />
+    <input
+      type="number"
+      inputmode="numeric"
+      placeholder="Max"
+      [value]="filters().ttmMax ?? ''"
+      (input)="updateNumber('ttmMax', $event)"
+    />
+  </fieldset>
+
+  <div class="toggles">
+    <label class="toggle">
+      <input
+        type="checkbox"
+        [checked]="!!filters().tirePros"
+        (change)="toggle('tirePros', $event)"
+      />
+      <span>Tire Pros only</span>
+    </label>
+    <label class="toggle">
+      <input
+        type="checkbox"
+        [checked]="!!filters().activate"
+        (change)="toggle('activate', $event)"
+      />
+      <span>Activate only</span>
+    </label>
+  </div>
+</section>

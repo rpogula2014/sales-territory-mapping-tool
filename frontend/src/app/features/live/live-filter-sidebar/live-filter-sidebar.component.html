@@ -1,0 +1,135 @@
+<aside class="sidebar">
+  <header class="sidebar__header">
+    <h3>Filters</h3>
+    <div class="sidebar__actions">
+      @if (schema().length) {
+        <button type="button" class="link" (click)="toggleAll()">
+          {{ allCollapsed() ? 'Expand all' : 'Collapse all' }}
+        </button>
+      }
+      @if (activeCount()) {
+        <button type="button" class="link" (click)="clearAll()">
+          Clear ({{ activeCount() }})
+        </button>
+      }
+    </div>
+  </header>
+
+  @if (totalCount().length > 0) {
+    <p
+      class="sidebar__count"
+      title="Unique locations matching every active filter. Per-token counts inside multiselects can overlap — this number does not."
+    >
+      <strong>{{ filteredCount().length | number }}</strong>
+      <span class="muted"> of {{ totalCount().length | number }} rows</span>
+    </p>
+  }
+
+  @if (loading() && schema().length === 0) {
+    <p class="muted small">Loading...</p>
+  } @else if (schema().length === 0) {
+    <p class="muted small">No filterable fields.</p>
+  } @else {
+    @for (desc of schema(); track desc.field) {
+      <section class="filter" [class.filter--collapsed]="isCollapsed(desc.field)">
+        <button
+          type="button"
+          class="filter__label"
+          (click)="toggleCollapsed(desc.field)"
+          [attr.aria-expanded]="!isCollapsed(desc.field)"
+        >
+          <span class="chev">{{ isCollapsed(desc.field) ? '▸' : '▾' }}</span>
+          <span>{{ desc.label }}</span>
+          @if (isActive(desc.field)) {
+            <span class="active-dot" aria-label="active"></span>
+          }
+        </button>
+
+        @if (!isCollapsed(desc.field)) {
+        <div class="filter__body">
+          @switch (desc.control) {
+            @case ('toggle') {
+              <button
+                type="button"
+                class="toggle"
+                [class.toggle--on]="toggleValue(desc.field) === true"
+                [class.toggle--off]="toggleValue(desc.field) === false"
+                (click)="onToggleClick(desc.field)"
+              >
+                {{ toggleLabel(desc.field) }}
+              </button>
+            }
+
+            @case ('range') {
+              <div class="range">
+                <input
+                  type="number"
+                  [placeholder]="(desc.min ?? 0).toString()"
+                  [value]="rangeValue(desc.field, desc)[0]"
+                  (input)="onRangeMin(desc.field, desc, $event)"
+                />
+                <span class="dash">–</span>
+                <input
+                  type="number"
+                  [placeholder]="(desc.max ?? 0).toString()"
+                  [value]="rangeValue(desc.field, desc)[1]"
+                  (input)="onRangeMax(desc.field, desc, $event)"
+                />
+              </div>
+              <p class="muted small">
+                {{ desc.min | number }} – {{ desc.max | number }}
+              </p>
+            }
+
+            @case ('multiselect') {
+              <ul class="options">
+                @for (opt of desc.options; track opt.value) {
+                  <li>
+                    <label>
+                      <input
+                        type="checkbox"
+                        [checked]="isSelected(desc.field, opt.value)"
+                        (change)="toggleMultiselect(desc.field, opt.value)"
+                      />
+                      <span class="opt-value">{{ opt.value }}</span>
+                      <span class="opt-count">{{ opt.count }}</span>
+                    </label>
+                  </li>
+                }
+              </ul>
+            }
+
+            @case ('multiselect-tokens') {
+              <ul class="options">
+                @for (opt of desc.options; track opt.value) {
+                  <li>
+                    <label>
+                      <input
+                        type="checkbox"
+                        [checked]="isSelected(desc.field, opt.value)"
+                        (change)="toggleMultiselect(desc.field, opt.value)"
+                      />
+                      <span class="opt-value">{{ opt.value }}</span>
+                      <span class="opt-count">{{ opt.count }}</span>
+                    </label>
+                  </li>
+                }
+              </ul>
+            }
+
+            @case ('text') {
+              <input
+                type="search"
+                class="text"
+                placeholder="Contains..."
+                [value]="textValue(desc.field)"
+                (input)="onText(desc.field, $event)"
+              />
+            }
+          }
+        </div>
+        }
+      </section>
+    }
+  }
+</aside>

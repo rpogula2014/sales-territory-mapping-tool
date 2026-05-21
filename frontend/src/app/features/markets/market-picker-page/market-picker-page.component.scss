@@ -1,0 +1,203 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--color-bg);
+}
+
+.page {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-5);
+  display: grid;
+  gap: var(--space-6);
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-5);
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: var(--fz-12);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+}
+
+h1 {
+  margin: var(--space-1) 0 0;
+  font-size: var(--fz-28);
+  letter-spacing: -0.01em;
+}
+
+.cta {
+  background: var(--color-accent);
+  color: #fff;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--fz-14);
+  transition: background var(--transition-fast);
+}
+
+.cta:hover {
+  background: var(--color-accent-strong);
+  text-decoration: none;
+}
+
+.cta--ghost {
+  background: var(--color-surface);
+  color: var(--color-accent);
+  border: 1px solid var(--color-border-strong);
+}
+
+.cta--ghost:hover {
+  background: var(--color-accent-soft);
+  border-color: var(--color-accent);
+  color: var(--color-accent-strong);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.muted { color: var(--color-text-muted); }
+.muted.small { font-size: var(--fz-13); }
+
+.empty {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-7) var(--space-5);
+  text-align: center;
+  display: grid;
+  gap: var(--space-3);
+  justify-items: center;
+}
+
+.group {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: var(--space-2);
+}
+
+.group-header h2 {
+  margin: 0;
+  font-size: var(--fz-18);
+}
+
+.dataset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: var(--space-3);
+}
+
+.dataset-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  overflow: hidden;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.dataset-card:hover {
+  border-color: var(--color-accent);
+  box-shadow: var(--shadow-2);
+}
+
+.dataset-card__link {
+  display: block;
+  padding: var(--space-4);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.dataset-card__link:hover { text-decoration: none; }
+
+.dataset-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.dataset-card strong { font-size: var(--fz-16); }
+
+.dataset-card__foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface-muted);
+  font-size: var(--fz-13);
+  color: var(--color-text-muted);
+}
+
+.link-danger {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--fz-13);
+  color: var(--color-danger);
+  cursor: pointer;
+}
+.link-danger:hover { text-decoration: underline; background: none; border: none; }
+
+button.danger {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+  color: #fff;
+}
+button.danger:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--color-danger) 88%, #000);
+  border-color: color-mix(in srgb, var(--color-danger) 88%, #000);
+}
+
+.message {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  border-radius: var(--radius-sm);
+  font-size: var(--fz-13);
+}
+
+.badge {
+  font-size: var(--fz-12);
+  padding: 2px var(--space-2);
+  border-radius: 999px;
+  border: 1px solid var(--color-border-strong);
+  color: var(--color-text-muted);
+  background: var(--color-surface-muted);
+}
+
+.badge--active {
+  background: color-mix(in srgb, var(--color-success) 12%, var(--color-surface));
+  color: var(--color-success);
+  border-color: color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+
+dl {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-2);
+  margin: 0;
+}
+
+dt { font-size: var(--fz-12); color: var(--color-text-subtle); margin: 0; }
+dd { font-size: var(--fz-14); margin: 2px 0 0; }

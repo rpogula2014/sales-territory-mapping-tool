@@ -1,0 +1,152 @@
+:host { display: block; height: 100vh; }
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  height: 100vh;
+  background: var(--color-bg);
+}
+
+.rail {
+  position: relative;
+  z-index: 10;
+  background: var(--color-surface);
+  border-right: 1px solid var(--color-border);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 56px;
+  overflow: hidden;
+  transition: width var(--transition-fast);
+}
+
+.rail:hover,
+.rail:focus-within {
+  width: 220px;
+  box-shadow: var(--shadow-2);
+}
+
+.rail__brand {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-accent);
+}
+
+.rail__items {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2) 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  align-self: start;
+}
+
+.rail__items li { display: block; }
+
+.rail__items a {
+  position: relative;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  text-decoration: none;
+  color: var(--color-text-muted);
+  font-size: var(--fz-13);
+  font-weight: 500;
+  height: 36px;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.rail__items a > svg {
+  justify-self: center;
+}
+
+.rail__items a > span {
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+.rail:hover .rail__items a > span,
+.rail:focus-within .rail__items a > span {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.rail__items a:hover {
+  background: var(--color-accent-soft);
+  color: var(--color-accent-strong);
+  text-decoration: none;
+}
+
+.rail__items a.is-active {
+  color: var(--color-accent-strong);
+  background: var(--color-accent-soft);
+}
+
+.rail__items a.is-active::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 3px;
+  background: var(--color-accent);
+  border-radius: 0 2px 2px 0;
+}
+
+.rail-section-label {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-text-subtle);
+  padding: var(--space-3) var(--space-3) var(--space-1);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.rail:hover .rail-section-label,
+.rail:focus-within .rail-section-label { opacity: 1; }
+
+.rail__foot {
+  height: 40px;
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  border-top: 1px solid var(--color-border);
+  font-size: var(--fz-12);
+  color: var(--color-text-subtle);
+  white-space: nowrap;
+}
+
+.dot {
+  justify-self: center;
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--color-success);
+  box-shadow: 0 0 0 2px var(--color-surface), 0 0 0 3px color-mix(in srgb, var(--color-success) 30%, transparent);
+}
+
+.rail__foot-label {
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.rail:hover .rail__foot-label,
+.rail:focus-within .rail__foot-label {
+  opacity: 1;
+}
+
+.outlet {
+  min-width: 0;
+  min-height: 0;
+  height: 100vh;
+  overflow: auto;
+}
+
+/* Map page wants full-bleed inside outlet, no scroll */
+.app-shell--bleed .outlet { overflow: hidden; }

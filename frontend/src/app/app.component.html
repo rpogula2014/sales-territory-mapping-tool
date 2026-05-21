@@ -1,0 +1,94 @@
+<div class="app-shell" [class.app-shell--bleed]="fullBleed()">
+  <nav class="rail" aria-label="Primary navigation">
+    <div class="rail__brand" title="Territory mapping">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+        <path
+          fill="currentColor"
+          d="M12 2C7.6 2 4 5.6 4 10c0 5.4 7.2 11.4 7.5 11.6.3.3.8.3 1 0C12.8 21.4 20 15.4 20 10c0-4.4-3.6-8-8-8Zm0 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6Z"
+        />
+      </svg>
+    </div>
+
+    <ul class="rail__items">
+      <li>
+        <a routerLink="/home" routerLinkActive="is-active">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 3 2 12h3v8h5v-6h4v6h5v-8h3L12 3Z"
+            />
+          </svg>
+          <span>Home</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/markets" routerLinkActive="is-active">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 2C8.1 2 5 5.1 5 9c0 5.2 6.5 12.4 6.8 12.7.1.1.3.2.5.2s.4-.1.5-.2C12.5 21.4 19 14.2 19 9c0-3.9-3.1-7-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5Z"
+            />
+          </svg>
+          <span>Markets</span>
+        </a>
+      </li>
+
+      <li>
+        <a routerLink="/live/dcs" routerLinkActive="is-active">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 2C6.5 2 2 4 2 6.5v11C2 20 6.5 22 12 22s10-2 10-4.5v-11C22 4 17.5 2 12 2Zm0 2c4.4 0 8 1.3 8 2.5S16.4 9 12 9 4 7.7 4 6.5 7.6 4 12 4Zm0 16c-4.4 0-8-1.3-8-2.5v-2.7c1.9 1 4.7 1.7 8 1.7s6.1-.7 8-1.7v2.7c0 1.2-3.6 2.5-8 2.5Zm0-5c-4.4 0-8-1.3-8-2.5V9.8c1.9 1 4.7 1.7 8 1.7s6.1-.7 8-1.7v2.7c0 1.2-3.6 2.5-8 2.5Z"
+            />
+          </svg>
+          <span>Live mapping</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/live/changes" routerLinkActive="is-active">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2Zm0 18c-4.4 0-8-3.6-8-8s3.6-8 8-8 8 3.6 8 8-3.6 8-8 8Zm1-13h-2v6h6v-2h-4V7Z"
+            />
+          </svg>
+          <span>Changes</span>
+        </a>
+      </li>
+
+      <li class="rail-section-label">Admin</li>
+
+      <li>
+        <a routerLink="/admin/markets" routerLinkActive="is-active">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M4 5h16v3H4V5Zm0 5h16v3H4v-3Zm0 5h10v3H4v-3Z"
+            />
+          </svg>
+          <span>Manage markets</span>
+        </a>
+      </li>
+      <li>
+        <a routerLink="/admin/import" routerLinkActive="is-active">
+          <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
+            <path
+              fill="currentColor"
+              d="M12 3 5 10h4v6h6v-6h4l-7-7Zm-7 16h14v2H5v-2Z"
+            />
+          </svg>
+          <span>Import Excel</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="rail__foot" title="Sales operations">
+      <span class="dot" aria-hidden="true"></span>
+      <span class="rail__foot-label">Local dev</span>
+    </div>
+  </nav>
+
+  <main class="outlet">
+    <router-outlet />
+  </main>
+</div>

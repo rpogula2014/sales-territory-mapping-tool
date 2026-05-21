@@ -1,0 +1,82 @@
+<main class="page">
+  <header class="page-header">
+    <p class="eyebrow">Dashboard</p>
+    <h1>Sales territory mapping</h1>
+    <p class="lede">
+      Import account spreadsheets, plot them on the map, and assign sellers in bulk.
+    </p>
+  </header>
+
+  <section class="tiles">
+    <a class="tile" routerLink="/markets">
+      <span class="tile__num">{{ markets().length }}</span>
+      <span class="tile__label">Markets</span>
+      <span class="tile__hint">View all</span>
+    </a>
+    <a class="tile" routerLink="/markets">
+      <span class="tile__num">{{ datasets().length }}</span>
+      <span class="tile__label">Datasets</span>
+      <span class="tile__hint">Open map</span>
+    </a>
+    <a class="tile tile--accent" routerLink="/markets">
+      <span class="tile__num">{{ activeDatasets().length }}</span>
+      <span class="tile__label">Active datasets</span>
+      <span class="tile__hint">Open map</span>
+    </a>
+    <a class="tile tile--live" routerLink="/live/changes">
+      <span class="tile__num">{{ changesSummary().changed }}</span>
+      <span class="tile__label">Live changes</span>
+      <span class="tile__hint">
+        {{ changesSummary().total }} total · review
+      </span>
+    </a>
+  </section>
+
+  <section class="quick">
+    <h2>Live flow</h2>
+    <div class="quick__grid">
+      <a class="action" routerLink="/live/dcs">
+        <strong>Pick a DC</strong>
+        <span>Browse DCs from Oracle and assign sellers against live prod-msa data.</span>
+      </a>
+      <a class="action" routerLink="/live/changes">
+        <strong>Review changes</strong>
+        <span>Cross-DC list of locally re-assigned sites. Bulk revert supported.</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="quick">
+    <h2>Quick actions</h2>
+    <div class="quick__grid">
+      <a class="action" routerLink="/admin/import">
+        <strong>Import Excel</strong>
+        <span>Upload Cynthia's spreadsheet, validate columns, geocode, and persist.</span>
+      </a>
+      <a class="action" routerLink="/admin/markets">
+        <strong>Manage markets</strong>
+        <span>Create new sales markets or retire ones no longer needed.</span>
+      </a>
+      <a class="action" routerLink="/markets">
+        <strong>Browse markets</strong>
+        <span>Pick a dataset and start assigning sellers.</span>
+      </a>
+    </div>
+  </section>
+
+  @if (recentDatasets().length > 0) {
+    <section class="recent">
+      <h2>Recent datasets</h2>
+      <ul>
+        @for (dataset of recentDatasets(); track dataset.id) {
+          <li>
+            <a [routerLink]="['/map', dataset.id]">
+              <strong>{{ dataset.name }}</strong>
+              <span class="muted">{{ dataset.import_status }} · {{ dataset.row_count }} rows</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+</main>

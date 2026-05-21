@@ -1,0 +1,56 @@
+<aside class="panel">
+  <button type="button" class="panel__close" (click)="onClose()" aria-label="Close">✕</button>
+
+  <p class="eyebrow">Loc {{ row().locationNumber }} · Site {{ row().siteUseID }}</p>
+  <h3>{{ row().dba_name || '—' }}</h3>
+
+  <div class="status-row">
+    <span class="status-badge status-{{ status() }}">{{ status() }}</span>
+    @if (row().assignment?.assignedAt) {
+      <span class="muted small">
+        v{{ row().assignment?.version }} · by {{ row().assignment?.assignedBy }}
+      </span>
+    }
+  </div>
+
+  <dl class="kv">
+    <dt>Live seller</dt>
+    <dd>{{ liveSellerName() || '—' }}</dd>
+
+    @if (hasLocal()) {
+      <dt>Assigned seller</dt>
+      <dd>{{ row().assignment?.sellerName || '—' }}</dd>
+
+      @if (status() === 'changed' || status() === 'stale') {
+        <dt>Previous (baseline)</dt>
+        <dd>{{ row().assignment?.previousSellerName || '—' }}</dd>
+      }
+    }
+  </dl>
+
+  <label class="picker">
+    <span>Assign seller</span>
+    <select (change)="onSelect($event)">
+      <option value="">— pick a seller —</option>
+      @for (opt of sellerOptions(); track opt.id) {
+        <option [value]="opt.id" [selected]="opt.id === currentSellerId()">{{ opt.name }}</option>
+      }
+    </select>
+  </label>
+
+  <div class="actions">
+    <button class="btn btn--primary" type="button" [disabled]="saving()" (click)="save()">
+      {{ saving() ? 'Saving...' : 'Save' }}
+    </button>
+    @if (status() === 'stale') {
+      <button class="btn btn--warn" type="button" [disabled]="saving()" (click)="reconfirm()" title="Re-anchor baseline to current source seller; keep your local override.">
+        Re-confirm
+      </button>
+    }
+    @if (hasLocal()) {
+      <button class="btn" type="button" [disabled]="saving()" (click)="acceptSource()">
+        Accept source
+      </button>
+    }
+  </div>
+</aside>
